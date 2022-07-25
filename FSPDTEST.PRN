@@ -1,0 +1,88 @@
+ZSM 4.7	Source file: FSPDTEST 	                     	Page    1
+
+                                          .z80
+                                
+  000D  =                       CR        equ  00Dh
+  000A  =                       LF        equ  00Ah
+  0001  =                       EOF       equ  001h
+  0024  =                       EOS       equ  '$'
+  0080  =                       STKSIZE   equ  080h
+  0005  =                       BDOS      equ  00005h
+  005C  =                       FCB       equ  0005Ch
+  0080  =                       DMA       equ  00080h
+  0009  =                       PRINT     equ  009h
+  000F  =                       FOPEN     equ  00Fh
+  0010  =                       FCLOSE    equ  010h
+  0014  =                       FREAD     equ  014h 
+  00FF  =                       FERROR    equ  0FFh
+                                
+                                          cseg
+  0000'                         main:
+  0000' ED 73 0080"                       ld   (stacktop),sp
+  0004' 31 0080"                          ld   sp,stacktop
+                                
+  0007' 11 0082"                          ld   de,intro
+  000A' 0E 09                             ld   c,PRINT
+  000C' CD 0005                           call BDOS
+                                
+  000F' 11 005C                           ld   de,FCB
+  0012' 0E 0F                             ld   c,FOPEN
+  0014' CD 0005                           call BDOS
+  0017' FE FF                             cp   FERROR
+  0019' 28 1C                             jr   z,errexit
+                                
+  001B'                         readloop:
+  001B' 11 005C                           ld   de,FCB
+  001E' 0E 14                             ld   c,FREAD
+  0020' CD 0005                           call BDOS
+  0023' B7                                or   a
+  0024' 28 F5                             jr   z,readloop
+  0026' FE 01                             cp   EOF
+  0028' 20 0D                             jr   nz,errexit
+                                
+  002A' 11 005C                           ld   de,FCB
+  002D' 0E 10                             ld   c,FCLOSE
+  002F' CD 0005                           call BDOS
+                                
+  0032' 11 009F"                          ld   de,oktext
+  0035' 18 03                             jr   quit
+  0037'                         errexit:  
+  0037' 11 00A5"                          ld   de,errtext
+  003A'                         quit:
+  003A' 0E 09                             ld   c,PRINT
+  003C' CD 0005                           call BDOS
+                                
+  003F' ED 7B 0080"                       ld   sp,(stacktop)
+  0043' C7                                rst  0
+                                
+                                          dseg
+                                
+  0000" ( 0080 )                          ds   STKSIZE
+ZSM 4.7	Source file: FSPDTEST 	                     	Page    2
+
+  0080" 0000                    stacktop: dw   0
+  0082" 54 65 73 74 69 6E       intro:    db   "Testing disk read speed...",CR,LF,EOS     
+  0088" 67 20 64 69 73 6B       
+  008E" 20 72 65 61 64 20       
+  0094" 73 70 65 65 64 2E       
+  009A" 2E 2E 0D 0A 24          
+  009F" 44 6F 6E 65 2E 24       oktext:   db   "Done.",EOS
+  00A5" 46 69 6C 65 20 61       errtext:  db   "File access error!",EOS
+  00AB" 63 63 65 73 73 20       
+  00B1" 65 72 72 6F 72 21       
+  00B7" 24                      
+                                
+  0000' =                                 end  main
+
+Errors: 0
+ZSM 4.7	Source file: FSPDTEST 	                     	Page    3
+
+Symbols:
+BDOS ............. 0005   CR ............... 000D   DMA .............. 0080 
+EOF .............. 0001   EOS .............. 0024   ERREXIT .......... 0037'
+ERRTEXT .......... 00A5"  FCB .............. 005C   FCLOSE ........... 0010 
+FERROR ........... 00FF   FOPEN ............ 000F   FREAD ............ 0014 
+INTRO ............ 0082"  LF ............... 000A   MAIN ............. 0000'
+OKTEXT ........... 009F"  PRINT ............ 0009   QUIT ............. 003A'
+READLOOP ......... 001B'  STACKTOP ......... 0080"  STKSIZE .......... 0080 
+

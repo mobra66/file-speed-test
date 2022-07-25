@@ -3,6 +3,8 @@
 CR        equ  00Dh
 LF        equ  00Ah
 EOF       equ  001h
+EOS       equ  '$'
+STKSIZE   equ  080h
 BDOS      equ  00005h
 FCB       equ  0005Ch
 DMA       equ  00080h
@@ -17,8 +19,8 @@ main:
           ld   (stacktop),sp
           ld   sp,stacktop
 
-          ld   c,PRINT
           ld   de,intro
+          ld   c,PRINT
           call BDOS
 
           ld   de,FCB
@@ -26,6 +28,7 @@ main:
           call BDOS
           cp   FERROR
           jr   z,errexit
+
 readloop:
           ld   de,FCB
           ld   c,FREAD
@@ -35,29 +38,27 @@ readloop:
           cp   EOF
           jr   nz,errexit
 
-okexit:   ld   de,FCB
+          ld   de,FCB
           ld   c,FCLOSE
           call BDOS
-          ld   de,exitok
-          ld   c,PRINT
-          call BDOS
+
+          ld   de,oktext
           jr   quit
-
-errexit:  ld   de,exiterr
+errexit:  
+          ld   de,errtext
+quit:
           ld   c,PRINT
           call BDOS
-quit:
-          ld   sp,(stacktop)
-          ret
 
+          ld   sp,(stacktop)
+          rst  0
 
           dseg
 
-          ds   080h
+          ds   STKSIZE
 stacktop: dw   0
-intro:    db   "Testing disk read speed...",CR,LF,"$"     
-exitok    db   "Done.$"
-exiterr   db   "File access error!$"
+intro:    db   "Testing disk read speed...",CR,LF,EOS     
+oktext:   db   "Done.",EOS
+errtext:  db   "File access error!",EOS
 
           end  main
-
