@@ -1,0 +1,63 @@
+          .z80
+
+CR        equ  00Dh
+LF        equ  00Ah
+EOF       equ  001h
+BDOS      equ  00005h
+FCB       equ  0005Ch
+DMA       equ  00080h
+PRINT     equ  009h
+FOPEN     equ  00Fh
+FCLOSE    equ  010h
+FREAD     equ  014h 
+FERROR    equ  0FFh
+
+          cseg
+main:
+          ld   (stacktop),sp
+          ld   sp,stacktop
+
+          ld   c,PRINT
+          ld   de,intro
+          call BDOS
+
+          ld   de,FCB
+          ld   c,FOPEN
+          call BDOS
+          cp   FERROR
+          jr   z,errexit
+readloop:
+          ld   de,FCB
+          ld   c,FREAD
+          call BDOS
+          or   a
+          jr   z,readloop
+          cp   EOF
+          jr   nz,errexit
+
+okexit:   ld   de,FCB
+          ld   c,FCLOSE
+          call BDOS
+          ld   de,exitok
+          ld   c,PRINT
+          call BDOS
+          jr   quit
+
+errexit:  ld   de,exiterr
+          ld   c,PRINT
+          call BDOS
+quit:
+          ld   sp,(stacktop)
+          ret
+
+
+          dseg
+
+          ds   080h
+stacktop: dw   0
+intro:    db   "Testing disk read speed...",CR,LF,"$"     
+exitok    db   "Done.$"
+exiterr   db   "File access error!$"
+
+          end  main
+
