@@ -7,14 +7,13 @@ EOS       equ  '$'
 STKSIZE   equ  080h
 BDOS      equ  00005h
 FCB       equ  0005Ch
-DMA       equ  00080h
 PRINT     equ  009h
 FOPEN     equ  00Fh
 FCLOSE    equ  010h
 FREAD     equ  014h 
 FERROR    equ  0FFh
 
-          cseg
+          cseg ; ----------------
 main:
           ld   (stacktop),sp
           ld   sp,stacktop
@@ -28,7 +27,6 @@ main:
           call BDOS
           cp   FERROR
           jr   z,errexit
-
 readloop:
           ld   de,FCB
           ld   c,FREAD
@@ -41,6 +39,8 @@ readloop:
           ld   de,FCB
           ld   c,FCLOSE
           call BDOS
+          cp   FERROR
+          jr   z,errexit
 
           ld   de,oktext
           jr   quit
@@ -51,9 +51,9 @@ quit:
           call BDOS
 
           ld   sp,(stacktop)
-          rst  0
+          ret
 
-          dseg
+          dseg ; ----------------
 
           ds   STKSIZE
 stacktop: dw   0
